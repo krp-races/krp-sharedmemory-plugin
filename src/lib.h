@@ -8,6 +8,9 @@
 #include "krp/krp-track.h"
 #include "krp/krp-race.h"
 #include "krp/krp-replay.h"
+#include "SharedMemory.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
 
 using namespace krp::kart;
 using namespace krp::draw;
