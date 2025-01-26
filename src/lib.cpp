@@ -303,7 +303,7 @@ void TrackCenterline(int _iNumSegments, SPluginsTrackSegment_t *_pasSegment, flo
     for (int i = 0; i < _iNumSegments; i++)
     {
         STrackSegment_t *segment = &memData->trackSegments[i];
-        segment->type = (ETrackSegmentType) _pasSegment[i].m_iType;
+        segment->type = (ETrackSegmentType)_pasSegment[i].m_iType;
         segment->angle = _pasSegment[i].m_fAngle;
         segment->length = _pasSegment[i].m_fLength;
         segment->radius = _pasSegment[i].m_fRadius;
@@ -314,6 +314,120 @@ void TrackCenterline(int _iNumSegments, SPluginsTrackSegment_t *_pasSegment, flo
 
     for (int i = 0; i < MAX_SPLITS + 2; i++)
         memData->racedata[i] = _pfRaceData[i];
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceEvent(SPluginsRaceEvent_t *_pData, int _iDataSize)
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    memData->eventType = (EEventType)_pData->m_iEventType;
+    for (int i = 0; i < STRING_MAX_LENGTH; i++)
+        memData->eventName[i] = _pData->m_szName[i];
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceDeinit()
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    memData->eventType = EEventType::NONE;
+    for (int i = 0; i < STRING_MAX_LENGTH; i++)
+        memData->eventName[i] = '\0';
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceAddEntry(SPluginsRaceAddEntry_t *_pData, int _iDataSize)
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    memData->numEventEntries++;
+
+    SEventEntry_t *entry = &memData->eventEntries[memData->numEventEntries - 1];
+    entry->raceNumber = _pData->m_iRaceNum;
+    entry->unactive = _pData->unactive;
+    entry->numberOfGears = _pData->m_iNumberOfGears;
+    entry->maxRPM = _pData->m_iMaxRPM;
+
+    for (int i = 0; i < STRING_MAX_LENGTH; i++)
+    {
+        entry->name[i] = _pData->m_szName[i];
+        entry->kartName[i] = _pData->m_szKartName[i];
+        entry->kartShortName[i] = _pData->m_szKartShortName[i];
+        entry->category[i] = _pData->m_szCategory[i];
+    }
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceRemoveEntry(SPluginsRaceRemoveEntry_t *_pData, int _iDataSize)
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    for (int i = 0; i < memData->numEventEntries; i++)
+    {
+        if (memData->eventEntries[i].raceNumber != _pData->m_iRaceNum) continue;
+        memData->eventEntries[i].unactive = true;
+        memData->eventEntries[i].numberOfGears = 0;
+        memData->eventEntries[i].maxRPM = 0;
+    }
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceSession(SPluginsRaceSession_t *_pData, int _iDataSize)
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    memData->session = _pData->m_iSession;
+    memData->sessionSeries = _pData->m_iSessionSeries;
+    memData->sessionGroups[0] = _pData->m_iGroup1;
+    memData->sessionGroups[1] = _pData->m_iGroup2;
+    memData->sessionState = _pData->m_iSessionState;
+    memData->sessionLength = _pData->m_iSessionLength;
+    memData->sessionLaps = _pData->m_iSessionNumLaps;
+    memData->numEventEntries = _pData->m_iNumEntries;
+    memData->weatherCondition = (EWeatherCondition) _pData->m_iConditions;
+    memData->airTemperature = _pData->m_fAirTemperature;
+    memData->trackTemperature = _pData->m_fTrackTemperature;
+
+    for (int i = 0; i < MAX_ENTRIES; i++) {
+        memData->sessionEntries[i] = _pData->m_aiEntries[i];
+        memData->sessionGrid[i] = _pData->m_aiGrid[i];
+    }
+
+    memData->sequenceNumber++;
+    mem.write();
+}
+
+void RaceSessionState(SPluginsRaceSessionState_t *_pData, int _iDataSize)
+{
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber++;
+    mem.write();
+
+    memData->session = _pData->m_iSession;
+    memData->sessionSeries = _pData->m_iSessionSeries;
+    memData->sessionState = _pData->m_iSessionState;
+    memData->sessionLength = _pData->m_iSessionLength;
 
     memData->sequenceNumber++;
     mem.write();

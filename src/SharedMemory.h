@@ -7,6 +7,7 @@ std::string SHARED_MEMORY_NAME = "$krp$";
 
 const int STRING_MAX_LENGTH = 100;
 const int MAX_TRACK_SEGMENTS = 100;
+const int MAX_ENTRIES = 50;
 const int MAX_SPLITS = 3;
 
 enum EGameState
@@ -39,6 +40,21 @@ enum ETrackSegmentType
     CURVE
 };
 
+enum EEventType
+{
+    REPLAY = -1,
+    NONE = 0,
+    TESTING,
+    RACE,
+    CHALLENGE = 4
+};
+
+enum EWeatherCondition {
+    SUNNY = 0,
+    CLOUDY,
+    RAINY
+};
+
 typedef struct
 {
     ETrackSegmentType type;
@@ -49,6 +65,18 @@ typedef struct
     float startY;
     float startZ;
 } STrackSegment_t;
+
+typedef struct
+{
+    int raceNumber;
+    char name[STRING_MAX_LENGTH];
+    char kartName[STRING_MAX_LENGTH];
+    char kartShortName[STRING_MAX_LENGTH];
+    char category[STRING_MAX_LENGTH];
+    bool unactive;
+    int numberOfGears;
+    int maxRPM;
+} SEventEntry_t;
 
 typedef struct
 {
@@ -116,6 +144,24 @@ typedef struct
     float racedata[MAX_SPLITS + 2];
     int numTrackSegments;
     STrackSegment_t trackSegments[MAX_TRACK_SEGMENTS];
+
+    EEventType eventType;
+    char eventName[STRING_MAX_LENGTH];
+    int numEventEntries;
+    SEventEntry_t eventEntries[MAX_ENTRIES];
+
+    int session;
+    int sessionSeries;
+    int sessionGroups[2];
+    int sessionState;
+    int sessionLength;
+    int sessionLaps;
+    int numSessionEntries;
+    int sessionEntries[MAX_ENTRIES];
+    int sessionGrid[MAX_ENTRIES];
+    EWeatherCondition weatherCondition;
+    float airTemperature;
+    float trackTemperature;
 } SSharedMemory_t;
 
 #endif
