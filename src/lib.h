@@ -8,7 +8,7 @@
 #include "krp/krp-track.h"
 #include "krp/krp-race.h"
 #include "krp/krp-replay.h"
-#include "SharedMemory.h"
+#include "sharedmemory.h"
 #include "logger/logger.h"
 #include "memory/memory.h"
 

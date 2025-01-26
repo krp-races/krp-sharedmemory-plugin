@@ -7,10 +7,11 @@ add_library(krp-sharedmemory-plugin SHARED
     src/krp/krp-track.h
     src/krp/krp-race.h
     src/krp/krp-replay.h
-    src/SharedMemory.h
     src/logger/logger.cpp
     src/logger/logger.h
     src/memory/memory.h
+    src/memory/memory.cpp
+    src/sharedmemory.h
     src/lib.cpp
     src/lib.h)
 
