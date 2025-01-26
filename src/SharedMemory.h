@@ -6,8 +6,10 @@
 std::string SHARED_MEMORY_NAME = "$krp$";
 
 const int STRING_MAX_LENGTH = 100;
+const int MAX_COMMUNICATIONS = 100;
 const int MAX_TRACK_SEGMENTS = 100;
 const int MAX_ENTRIES = 50;
+const int MAX_CAMERAS = 20;
 const int MAX_SPLITS = 2;
 
 enum EGameState
@@ -17,8 +19,8 @@ enum EGameState
     PIT,
     PAUSED,
     ONTRACK,
-    SPECTATE,
-    REPLAY
+    SPECTATING,
+    REPLAYING
 };
 
 enum EDriveType
@@ -49,10 +51,51 @@ enum EEventType
     CHALLENGE = 4
 };
 
-enum EWeatherCondition {
+enum EWeatherCondition
+{
     SUNNY = 0,
     CLOUDY,
     RAINY
+};
+
+enum ECommunicationType
+{
+    CHANGE_STATE = 1,
+    PENALTY
+};
+
+enum ECommunicationReason
+{
+    JUMP_START_REASON = 0,
+    TOO_MANY_OFFENCES,
+    ROLLING_START_SPEEDING,
+    ROLLING_START_TOO_SLOW,
+    ROLLING_START_CORRIDOR_CROSSING,
+    ROLLING_START_OVERTAKING,
+    DIRECTOR
+};
+
+enum ECommunicationOffence
+{
+    JUMP_START_OFFENCE = 1,
+    CUTTING_OFFENCE = 3,
+    ROLLING_START_SPEEDING_OFFENCE,
+    ROLLING_START_TOO_SLOW_OFFENCE,
+    ROLLING_START_CORRIDOR_CROSSING_OFFENCE,
+    ROLLING_START_OVERTAKING_OFFENCE
+};
+
+enum ECommunicationPenaltyType
+{
+    TIME = 1,
+    POSITION
+};
+
+enum EEntryState
+{
+    DNS = 1,
+    RETIRED,
+    DSQ
 };
 
 typedef struct
@@ -77,6 +120,70 @@ typedef struct
     int numberOfGears;
     int maxRPM;
 } SEventEntry_t;
+
+typedef struct
+{
+    int lap;
+    int time;
+    int raceNumber;
+    int session;
+    int sessionSeries;
+    ECommunicationType type;
+    EEntryState state;
+    ECommunicationReason reason;
+    ECommunicationOffence offence;
+    ECommunicationPenaltyType penaltyType;
+} SCommunication_t;
+
+typedef struct
+{
+    int raceNumber;
+    float posX, posY, posZ;
+    float yaw;
+    float trackPos;
+} STrackPosition_t;
+
+typedef struct
+{
+    int raceNumber;
+    bool active;
+    int rpm;
+    int gear;
+    float speed;
+    float steer;
+    float throttle;
+    float brake;
+} SVehicleData_t;
+
+typedef struct
+{
+    int raceNumber;
+    EEntryState state;
+    int bestLapTime;
+    float bestSpeed;
+    int bestLapNum;
+    int numLaps;
+    int gap;
+    int gapLaps;
+    int penalty;
+    bool inPit;
+} SClassificationEntry_t;
+
+typedef struct
+{
+    int session;
+    int sessionSeries;
+    int sessionState;
+    int sessionTime;
+    int numEntries;
+    SClassificationEntry_t entries[MAX_ENTRIES];
+} SClassification_t;
+
+typedef struct
+{
+    int raceNumber;
+    char name[STRING_MAX_LENGTH];
+} SSpectateVehicle_t;
 
 typedef struct
 {
@@ -163,7 +270,45 @@ typedef struct
     float airTemperature;
     float trackTemperature;
 
-    int 
+    int bestEventLapTime;
+    int bestSessionLapTime;
+
+    int kartIdxLap[MAX_ENTRIES];
+    int kartIdxLastLapTime[MAX_ENTRIES];
+    bool kartIdxLastLapValid[MAX_ENTRIES];
+    int kartIdxBestLapTime[MAX_ENTRIES];
+    int kartIdxEstimatedLapTimeToLastLap[MAX_ENTRIES];
+    int kartIdxEstimatedLapTimeToBestLap[MAX_ENTRIES];
+    int kartIdxLastLapDeltaToLastLap[MAX_ENTRIES];
+    int kartIdxLastLapDeltaToBestLap[MAX_ENTRIES];
+    int kartIdxLapDeltaToLastLap[MAX_ENTRIES];
+    int kartIdxLapDeltaToBestLap[MAX_ENTRIES];
+
+    int kartIdxLastSplitIndex[MAX_ENTRIES];
+    int kartIdxLastSplits[MAX_ENTRIES][MAX_SPLITS];
+    int kartIdxBestSplits[MAX_ENTRIES][MAX_SPLITS];
+
+    float kartIdxLastSpeed[MAX_ENTRIES];
+    float kartIdxBestSpeed[MAX_ENTRIES];
+
+    int numCommunications;
+    SCommunication_t communications[MAX_ENTRIES];
+
+    int numTrackPositions;
+    STrackPosition_t trackPositions[MAX_ENTRIES];
+
+    SVehicleData_t kartIdxVehicleData[MAX_ENTRIES];
+    SClassification_t classification;
+
+    int requestedSpectateVehicle;
+    int selectedSpectateVehicle;
+    int numSpectateVehicles;
+    SSpectateVehicle_t spectateVehicles[MAX_ENTRIES];
+
+    int requestedCamera;
+    int selectedCamera;
+    int numCameras;
+    char cameras[MAX_CAMERAS][STRING_MAX_LENGTH];
 } SSharedMemory_t;
 
 #endif
