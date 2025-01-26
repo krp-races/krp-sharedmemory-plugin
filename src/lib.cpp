@@ -24,9 +24,6 @@ int GetInterfaceVersion()
 
 int Startup(char *savePath)
 {
-    Logger::write(LogLevel::INFO, "Startup");
-    Logger::write(LogLevel::INFO, savePath);
-
     mem.create();
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
@@ -34,8 +31,6 @@ int Startup(char *savePath)
     memData->gameState = EGameState::MENU;
     memData->sequenceNumber++;
     mem.write();
-
-    Logger::write(LogLevel::INFO, "Startup done");
 
     /*
     return value is requested rate
@@ -46,8 +41,6 @@ int Startup(char *savePath)
 
 void Shutdown()
 {
-    Logger::write(LogLevel::INFO, "Shutdown");
-
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();
@@ -55,8 +48,6 @@ void Shutdown()
     memData->sequenceNumber++;
     mem.write();
     mem.close();
-
-    Logger::write(LogLevel::INFO, "Shutdown done");
 }
 
 void EventInit(SPluginsKartEvent_t *_pData, int _iDataSize)
