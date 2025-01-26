@@ -8,7 +8,7 @@ std::string SHARED_MEMORY_NAME = "$krp$";
 const int STRING_MAX_LENGTH = 100;
 const int MAX_TRACK_SEGMENTS = 100;
 const int MAX_ENTRIES = 50;
-const int MAX_SPLITS = 3;
+const int MAX_SPLITS = 2;
 
 enum EGameState
 {
@@ -162,6 +162,8 @@ typedef struct
     EWeatherCondition weatherCondition;
     float airTemperature;
     float trackTemperature;
+
+    int 
 } SSharedMemory_t;
 
 #endif
