@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+const int SHARED_MEMORY_VERSION = 1;
 std::string SHARED_MEMORY_NAME = "$krp$";
 
 const int STRING_MAX_LENGTH = 100;
@@ -188,6 +189,7 @@ typedef struct
 typedef struct
 {
     int sequenceNumber;
+    int version;
     EGameState gameState;
 
     char driverName[STRING_MAX_LENGTH];

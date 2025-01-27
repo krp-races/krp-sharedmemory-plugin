@@ -28,6 +28,7 @@ int Startup(char *savePath)
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();
+    memData->version = SHARED_MEMORY_VERSION;
     memData->gameState = EGameState::MENU;
     memData->sequenceNumber++;
     mem.write();
