@@ -20,5 +20,5 @@ target_include_directories(krp-sharedmemory-plugin PRIVATE src)
 # Copy dll to dlo file as kart racing pro only uses dlo files
 add_custom_command(TARGET krp-sharedmemory-plugin POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_BINARY_DIR}/Debug/krp-sharedmemory-plugin.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/Debug/krp-sharedmemory-plugin.dlo)
+    ${CMAKE_CURRENT_BINARY_DIR}/Release/krp-sharedmemory-plugin.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/Release/krp-sharedmemory-plugin.dlo)
