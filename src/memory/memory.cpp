@@ -4,7 +4,7 @@ template <typename T>
 Memory<T>::Memory(std::string name)
 {
     BUFFER_NAME = name;
-    BUFFER_SIZE_BYTES = sizeof(SSharedMemory_t);
+    BUFFER_SIZE_BYTES = sizeof(T);
 }
 
 template <typename T>
