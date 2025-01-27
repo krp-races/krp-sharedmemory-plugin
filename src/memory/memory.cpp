@@ -56,6 +56,9 @@ T *Memory<T>::get()
     if (data == nullptr)
         data = (T *)MapViewOfFile(file, FILE_MAP_ALL_ACCESS, 0, 0, BUFFER_SIZE_BYTES);
 
+    if (data == nullptr)
+        throw std::runtime_error("Couldn't map file mapping (" + BUFFER_NAME + ").");
+
     return data;
 }
 
@@ -67,6 +70,9 @@ T *Memory<T>::write()
 
     if (data == nullptr)
         data = (T *)MapViewOfFile(file, FILE_MAP_ALL_ACCESS, 0, 0, BUFFER_SIZE_BYTES);
+
+    if (data == nullptr)
+        throw std::runtime_error("Couldn't map file mapping (" + BUFFER_NAME + ").");
 
     if (!FlushViewOfFile(data, BUFFER_SIZE_BYTES))
         throw std::runtime_error("Couldn't flush view of file (" + BUFFER_NAME + ").");
