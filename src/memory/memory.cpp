@@ -79,3 +79,23 @@ T *Memory<T>::write()
 
     return data;
 }
+
+template <typename T>
+T *Memory<T>::reset()
+{
+    if (file == nullptr)
+        throw std::runtime_error("No file mapping (" + BUFFER_NAME + ") opened.");
+
+    if (data == nullptr)
+        data = (T *)MapViewOfFile(file, FILE_MAP_ALL_ACCESS, 0, 0, BUFFER_SIZE_BYTES);
+
+    if (data == nullptr)
+        throw std::runtime_error("Couldn't map file mapping (" + BUFFER_NAME + ").");
+
+    memset(data, 0, BUFFER_SIZE_BYTES);
+
+    if (!FlushViewOfFile(data, BUFFER_SIZE_BYTES))
+        throw std::runtime_error("Couldn't flush view of file (" + BUFFER_NAME + ").");
+
+    return data;
+}

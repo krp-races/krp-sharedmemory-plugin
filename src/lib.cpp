@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <map>
 #include "lib.h"
 #include "memory/memory.cpp"
@@ -25,7 +26,7 @@ int GetInterfaceVersion()
 int Startup(char *savePath)
 {
     mem.create();
-    SSharedMemory_t *memData = mem.get();
+    SSharedMemory_t *memData = mem.reset();
     memData->sequenceNumber++;
     mem.write();
     memData->version = SHARED_MEMORY_VERSION;
@@ -344,21 +345,41 @@ void RaceAddEntry(SPluginsRaceAddEntry_t *_pData, int _iDataSize)
     memData->sequenceNumber++;
     mem.write();
 
-    memData->numEventEntries++;
-
-    entries.insert(std::pair<int, int>(_pData->m_iRaceNum, memData->numEventEntries - 1));
-    SEventEntry_t *entry = &memData->eventEntries[memData->numEventEntries - 1];
-    entry->raceNumber = _pData->m_iRaceNum;
-    entry->unactive = _pData->m_iUnactive;
-    entry->numberOfGears = _pData->m_iNumberOfGears;
-    entry->maxRPM = _pData->m_iMaxRPM;
-
-    for (int i = 0; i < STRING_MAX_LENGTH; i++)
+    auto entry = entries.find(_pData->m_iRaceNum);
+    if (entry != entries.end())
     {
-        entry->name[i] = _pData->m_szName[i];
-        entry->kartName[i] = _pData->m_szKartName[i];
-        entry->kartShortName[i] = _pData->m_szKartShortName[i];
-        entry->category[i] = _pData->m_szCategory[i];
+        SEventEntry_t *newEntry = &memData->eventEntries[entry->second];
+        newEntry->raceNumber = _pData->m_iRaceNum;
+        newEntry->unactive = _pData->m_iUnactive;
+        newEntry->numberOfGears = _pData->m_iNumberOfGears;
+        newEntry->maxRPM = _pData->m_iMaxRPM;
+
+        for (int i = 0; i < STRING_MAX_LENGTH; i++)
+        {
+            newEntry->name[i] = _pData->m_szName[i];
+            newEntry->kartName[i] = _pData->m_szKartName[i];
+            newEntry->kartShortName[i] = _pData->m_szKartShortName[i];
+            newEntry->category[i] = _pData->m_szCategory[i];
+        }
+    }
+    else
+    {
+        memData->numEventEntries++;
+        entries.insert(std::pair<int, int>(_pData->m_iRaceNum, memData->numEventEntries - 1));
+
+        SEventEntry_t *newEntry = &memData->eventEntries[memData->numEventEntries];
+        newEntry->raceNumber = _pData->m_iRaceNum;
+        newEntry->unactive = _pData->m_iUnactive;
+        newEntry->numberOfGears = _pData->m_iNumberOfGears;
+        newEntry->maxRPM = _pData->m_iMaxRPM;
+
+        for (int i = 0; i < STRING_MAX_LENGTH; i++)
+        {
+            newEntry->name[i] = _pData->m_szName[i];
+            newEntry->kartName[i] = _pData->m_szKartName[i];
+            newEntry->kartShortName[i] = _pData->m_szKartShortName[i];
+            newEntry->category[i] = _pData->m_szCategory[i];
+        }
     }
 
     memData->sequenceNumber++;
@@ -371,14 +392,16 @@ void RaceRemoveEntry(SPluginsRaceRemoveEntry_t *_pData, int _iDataSize)
     memData->sequenceNumber++;
     mem.write();
 
-    for (int i = 0; i < memData->numEventEntries; i++)
-    {
-        if (memData->eventEntries[i].raceNumber != _pData->m_iRaceNum)
-            continue;
-        memData->eventEntries[i].unactive = true;
-        memData->eventEntries[i].numberOfGears = 0;
-        memData->eventEntries[i].maxRPM = 0;
-    }
+    memData->numEventEntries--;
+    entries.erase(_pData->m_iRaceNum);
+
+    auto entry = entries.find(_pData->m_iRaceNum);
+    if (entry == entries.end())
+        return;
+
+    SEventEntry_t *newEntry = &memData->eventEntries[entry->second];
+    newEntry->raceNumber = _pData->m_iRaceNum;
+    newEntry->unactive = true;
 
     memData->sequenceNumber++;
     mem.write();
@@ -397,7 +420,7 @@ void RaceSession(SPluginsRaceSession_t *_pData, int _iDataSize)
     memData->sessionState = _pData->m_iSessionState;
     memData->sessionLength = _pData->m_iSessionLength;
     memData->sessionLaps = _pData->m_iSessionNumLaps;
-    memData->numEventEntries = _pData->m_iNumEntries;
+    memData->numSessionEntries = _pData->m_iNumEntries;
     memData->weatherCondition = (EWeatherCondition)_pData->m_iConditions;
     memData->airTemperature = _pData->m_fAirTemperature;
     memData->trackTemperature = _pData->m_fTrackTemperature;
@@ -553,16 +576,17 @@ void RaceClassification(SPluginsRaceClassification_t *_pData, int _iDataSize, SP
 
     for (int i = 0; i < _pData->m_iNumEntries; i++)
     {
-        SClassificationEntry_t *entry = &memData->classification.entries[i];
-        entry->raceNumber = _pArray[i].m_iRaceNum;
-        entry->state = (EEntryState)_pArray[i].m_iState;
-        entry->bestLapTime = _pArray[i].m_iBestLap;
-        entry->bestLapNum = _pArray[i].m_iBestLapNum;
-        entry->numLaps = _pArray[i].m_iNumLaps;
-        entry->gap = _pArray[i].m_iGap;
-        entry->gapLaps = _pArray[i].m_iGapLaps;
-        entry->penalty = _pArray[i].m_iPenalty;
-        entry->inPit = _pArray[i].m_iPit;
+        SClassificationEntry_t entry;
+        entry.raceNumber = _pArray[i].m_iRaceNum;
+        entry.state = (EEntryState)_pArray[i].m_iState;
+        entry.bestLapTime = _pArray[i].m_iBestLap;
+        entry.bestLapNum = _pArray[i].m_iBestLapNum;
+        entry.numLaps = _pArray[i].m_iNumLaps;
+        entry.gap = _pArray[i].m_iGap;
+        entry.gapLaps = _pArray[i].m_iGapLaps;
+        entry.penalty = _pArray[i].m_iPenalty;
+        entry.inPit = _pArray[i].m_iPit;
+        memData->classification.entries[i] = entry;
     }
 
     memData->sequenceNumber++;
