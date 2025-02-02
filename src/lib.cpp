@@ -151,7 +151,7 @@ void RunLap(SPluginsKartLap_t *_pData, int _iDataSize)
     // Last Lap
     memData->lap = _pData->m_iLapNum;
     memData->lastLapTime = _pData->m_iLapTime;
-    memData->lastLapValid = _pData->m_iInvalid;
+    memData->lastLapValid = !((bool)_pData->m_iInvalid);
 
     // Best Lap
     if (memData->lastLapValid && (memData->lastLapTime <= memData->bestLapTime || memData->bestLapTime == 0))
@@ -461,7 +461,7 @@ void RaceLap(SPluginsRaceLap_t *_pData, int _iDataSize)
     // Last Lap
     memData->kartIdxLap[id] = _pData->m_iLapNum;
     memData->kartIdxLastLapTime[id] = _pData->m_iLapTime;
-    memData->kartIdxLastLapValid[id] = _pData->m_iInvalid;
+    memData->kartIdxLastLapValid[id] = !((bool)_pData->m_iInvalid);
 
     // Best Event Lap
     if (memData->kartIdxLastLapValid[id] && (memData->kartIdxLastLapTime[id] <= memData->bestEventLapTime || memData->bestEventLapTime == 0))
