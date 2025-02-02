@@ -87,9 +87,10 @@ void EventInit(SPluginsKartEvent_t *_pData, int _iDataSize)
 
 void EventDeinit()
 {
-    SSharedMemory_t *memData = mem.get();
+    SSharedMemory_t *memData = mem.reset();
     memData->sequenceNumber++;
     mem.write();
+    entries.clear();
     memData->gameState = EGameState::MENU;
     memData->sequenceNumber++;
     mem.write();
@@ -671,6 +672,8 @@ int SpectateVehicles(int _iNumVehicles, SPluginsSpectateVehicle_t *_pVehicleData
 
 int SpectateCameras(int _iNumCameras, char *_pCameraData, int _iCurSelection, int *_piSelect)
 {
+    char *array = (char *)_pCameraData;
+    
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();
@@ -679,8 +682,10 @@ int SpectateCameras(int _iNumCameras, char *_pCameraData, int _iCurSelection, in
     memData->numCameras = _iNumCameras;
 
     for (int i = 0; i < _iNumCameras; i++)
-        for (int j = 0; j < STRING_MAX_LENGTH; j++)
-            memData->cameras[i][j] = _pCameraData[i * STRING_MAX_LENGTH + j];
+    {
+        strcpy_s(memData->cameras[i], STRING_MAX_LENGTH, array);
+        array += strlen(array) + 1;
+    }
 
     int returnVal = 0;
     if (memData->requestedCamera != memData->selectedCamera && memData->requestedCamera >= 0 && memData->requestedCamera < _iNumCameras)
