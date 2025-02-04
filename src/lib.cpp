@@ -26,7 +26,8 @@ int GetInterfaceVersion()
 int Startup(char *savePath)
 {
     mem.create();
-    SSharedMemory_t *memData = mem.reset();
+    SSharedMemory_t *memData = mem.get();
+    memData->sequenceNumber = 0;
     memData->sequenceNumber++;
     mem.write();
     memData->version = SHARED_MEMORY_VERSION;
@@ -87,7 +88,7 @@ void EventInit(SPluginsKartEvent_t *_pData, int _iDataSize)
 
 void EventDeinit()
 {
-    SSharedMemory_t *memData = mem.reset();
+    SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();
     entries.clear();
@@ -368,7 +369,7 @@ void RaceAddEntry(SPluginsRaceAddEntry_t *_pData, int _iDataSize)
         memData->numEventEntries++;
         entries.insert(std::pair<int, int>(_pData->m_iRaceNum, memData->numEventEntries - 1));
 
-        SEventEntry_t *newEntry = &memData->eventEntries[memData->numEventEntries];
+        SEventEntry_t *newEntry = &memData->eventEntries[memData->numEventEntries - 1];
         newEntry->raceNumber = _pData->m_iRaceNum;
         newEntry->unactive = _pData->m_iUnactive;
         newEntry->numberOfGears = _pData->m_iNumberOfGears;
@@ -392,9 +393,6 @@ void RaceRemoveEntry(SPluginsRaceRemoveEntry_t *_pData, int _iDataSize)
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();
-
-    memData->numEventEntries--;
-    entries.erase(_pData->m_iRaceNum);
 
     auto entry = entries.find(_pData->m_iRaceNum);
     if (entry == entries.end())
@@ -673,7 +671,7 @@ int SpectateVehicles(int _iNumVehicles, SPluginsSpectateVehicle_t *_pVehicleData
 int SpectateCameras(int _iNumCameras, char *_pCameraData, int _iCurSelection, int *_piSelect)
 {
     char *array = (char *)_pCameraData;
-    
+
     SSharedMemory_t *memData = mem.get();
     memData->sequenceNumber++;
     mem.write();

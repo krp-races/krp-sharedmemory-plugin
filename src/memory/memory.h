@@ -21,7 +21,6 @@ public:
     void close();
     T *get();
     T *write();
-    T *reset();
 };
 
 #endif
