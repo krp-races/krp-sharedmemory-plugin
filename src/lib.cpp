@@ -657,7 +657,7 @@ int SpectateVehicles(int _iNumVehicles, SPluginsSpectateVehicle_t *_pVehicleData
     }
 
     int returnVal = 0;
-    if (memData->requestedSpectateVehicle != memData->requestedSpectateVehicle && memData->requestedSpectateVehicle >= 0 && memData->requestedSpectateVehicle < _iNumVehicles)
+    if (memData->requestedSpectateVehicle != memData->selectedSpectateVehicle && memData->requestedSpectateVehicle >= 0 && memData->requestedSpectateVehicle < _iNumVehicles)
     {
         *(_piSelect) = memData->requestedSpectateVehicle;
         memData->requestedSpectateVehicle = -1;
