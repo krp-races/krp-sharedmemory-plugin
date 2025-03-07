@@ -93,6 +93,11 @@ void EventDeinit()
     mem.write();
     entries.clear();
     memData->gameState = EGameState::MENU;
+
+    // Reset laps
+    for (int i = 0; i < MAX_ENTRIES; i++)
+        memData->kartIdxLap[i] = 0;
+        
     memData->sequenceNumber++;
     mem.write();
 }
