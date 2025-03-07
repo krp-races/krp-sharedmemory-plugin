@@ -3,12 +3,13 @@
 
 #include <iostream>
 
-const int SHARED_MEMORY_VERSION = 1;
+const int SHARED_MEMORY_VERSION = 2;
 std::string SHARED_MEMORY_NAME = "$krp$";
 
 const int STRING_MAX_LENGTH = 100;
 const int MAX_COMMUNICATIONS = 100;
 const int MAX_TRACK_SEGMENTS = 100;
+const int MAX_LAPS = 100;
 const int MAX_ENTRIES = 50;
 const int MAX_CAMERAS = 20;
 const int MAX_SPLITS = 2;
@@ -285,6 +286,7 @@ typedef struct
     int kartIdxLastLapDeltaToBestLap[MAX_ENTRIES];
     int kartIdxLapDeltaToLastLap[MAX_ENTRIES];
     int kartIdxLapDeltaToBestLap[MAX_ENTRIES];
+    int kartIdxLapTimes[MAX_ENTRIES][MAX_LAPS];
 
     int kartIdxLastSplitIndex[MAX_ENTRIES];
     int kartIdxLastSplits[MAX_ENTRIES][MAX_SPLITS];
