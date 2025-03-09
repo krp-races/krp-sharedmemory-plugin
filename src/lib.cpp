@@ -97,7 +97,7 @@ void EventDeinit()
     // Reset laps
     for (int i = 0; i < MAX_ENTRIES; i++)
         memData->kartIdxLap[i] = 0;
-        
+
     memData->sequenceNumber++;
     mem.write();
 }
@@ -435,6 +435,48 @@ void RaceSession(SPluginsRaceSession_t *_pData, int _iDataSize)
         memData->sessionGrid[i] = _pData->m_aiGrid[i];
     }
 
+    // Resets
+    memData->lap = 0;
+    memData->lastLapTime = 0;
+    memData->lastLapValid = false;
+    memData->bestLapTime = 0;
+    memData->estimatedLapTimeToLastLap = 0;
+    memData->estimatedLapTimeToBestLap = 0;
+    memData->lastLapDeltaToLastLap = 0;
+    memData->lastLapDeltaToBestLap = 0;
+    memData->lapDeltaToLastLap = 0;
+    memData->lapDeltaToBestLap = 0;
+
+    memData->lastSplitIndex = 0;
+    for (int i = 0; i < MAX_SPLITS; i++) {
+        memData->lastSplits[i] = 0;
+        memData->bestSplits[i] = 0;
+    }
+
+    for (int i = 0; i < MAX_ENTRIES; i++) {
+        memData->kartIdxLap[i] = 0;
+        memData->kartIdxLastLapTime[i] = 0;
+        memData->kartIdxLastLapValid[i] = false;
+        memData->kartIdxBestLapTime[i] = 0;
+        memData->kartIdxEstimatedLapTimeToLastLap[i] = 0;
+        memData->kartIdxEstimatedLapTimeToBestLap[i] = 0;
+        memData->kartIdxLastLapDeltaToLastLap[i] = 0;
+        memData->kartIdxLastLapDeltaToBestLap[i] = 0;
+        memData->kartIdxLapDeltaToLastLap[i] = 0;
+        memData->kartIdxLapDeltaToBestLap[i] = 0;
+
+        memData->kartIdxLastSplitIndex[i] = 0;
+        for (int j = 0; j < MAX_SPLITS; j++) {
+            memData->kartIdxLastSplits[i][j] = 0;
+            memData->kartIdxBestSplits[i][j] = 0;
+        }
+
+        memData->kartIdxLastSpeed[i] = 0;
+        memData->kartIdxBestSpeed[i] = 0;
+    }
+
+    memData->numTrackPositions = 0;
+
     memData->sequenceNumber++;
     mem.write();
 }
@@ -466,9 +508,6 @@ void RaceLap(SPluginsRaceLap_t *_pData, int _iDataSize)
     memData->kartIdxLap[id] = _pData->m_iLapNum;
     memData->kartIdxLastLapTime[id] = _pData->m_iLapTime;
     memData->kartIdxLastLapValid[id] = !((bool)_pData->m_iInvalid);
-
-    // List of lap times
-    memData->kartIdxLapTimes[id][min(memData->kartIdxLap[id] - 1, MAX_LAPS - 1)] = memData->kartIdxLastLapTime[id];
 
     // Best Event Lap
     if (memData->kartIdxLastLapValid[id] && (memData->kartIdxLastLapTime[id] <= memData->bestEventLapTime || memData->bestEventLapTime == 0))
